@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+ 	xmlns:h="http://xmlns.jcp.org/jsf/html"
+ 	xmlns:f="http://xmlns.jcp.org/jsf/core"
+ 	xmlns:p="http://primefaces.org/ui"
+ 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+ 	template="WEB-INF/template/Layout.xhtml">
+ 	
+  <ui:define name="titulo">
+	Cadastro de Clientes
+  </ui:define>
+
+  <ui:define name="conteudo">
+	<f:metadata>
+		<f:viewAction action="#{gestaoClienteBean.todosClientes}" />
+	</f:metadata>
+	
+	<h:form id="frm">
+		<p:messages id="messages" />
+	
+		<p:toolbar id="toolbar">
+			<f:facet name="left">
+				<p:inputText id="termoPesquisa" placeholder="Digite aqui o CPF para pesquisa..." 
+					size="30" value="#{gestaoClienteBean.termoPesquisa}"/>
+				
+				<p:commandButton value="Pesquisar" icon="fa fa-search"
+					actionListener="#{gestaoClienteBean.pesquisar}" update="clientesDataTable messages"
+					process="@this termoPesquisa "/>
+				
+				<span class="ui-separator">
+	                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+	            </span>
+	            
+	            <p:commandButton value="Novo" icon="fa fa-plus"
+	            	actionListener="#{gestaoClienteBean.prepararNovoCliente}" 
+	            	oncomplete="PF('clienteDialogWidgetVar').show()"
+	            	update="clienteDialog" process="@this">
+	            	<p:resetInput target="clienteDialog" />
+	            </p:commandButton>
+				<span class="ui-separator">
+	                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+	            </span>
+	            
+	            <p:commandButton value="Editar" icon="fa fa-edit" 
+	             	disabled="#{not gestaoClienteBean.clienteSelecionado}"
+	             	oncomplete="PF('clienteDialogWidgetVar').show()"
+	            	update="clienteDialog" process="@this">
+	            	<p:resetInput target="clienteDialog" />
+	             </p:commandButton>>
+	            
+	            <p:commandButton value="Exclui" icon="fa fa-trash" 
+		            disabled="#{not gestaoClienteBean.clienteSelecionado}"
+	            	actionListener="#{gestaoClienteBean.excluir}" 
+	            	update="messages clientesDataTable toolbar" process="@this" />
+	            
+				<span class="ui-separator">
+	                <span class="ui-icon ui-icon-grip-dotted-vertical" />
+	            </span>
+
+	            <p:commandButton value="Sair" icon="fa fa-close" 
+	            	action="#{gestaoClienteBean.logoff}" 
+	            	 />
+	            
+			</f:facet>
+		</p:toolbar>
+		
+		<p:spacer height="20px" />
+		
+		<p:dataTable id="clientesDataTable" value="#{gestaoClienteBean.listaClientes}"
+			var="cliente" emptyMessage="Nenhuma informação a ser exibida"
+			paginator="true" rows="10" paginatorPosition="bottom"
+			selectionMode="single" selection="#{gestaoClienteBean.cliente}" rowKey="#{cliente.id}">
+
+			<p:ajax event="rowSelect" update="frm:toolbar" />
+			
+			<p:ajax event="rowUnselect" update="frm:toolbar" />
+			
+			<p:column headerText="CPF" sortBy="#{cliente.cpf}">
+				<h:outputText value="#{cliente.cpf}" />
+			</p:column>
+
+
+			<p:column headerText="Nome" sortBy="#{cliente.nome}">
+				<h:outputText value="#{cliente.nome}" />
+			</p:column>
+			
+			<p:column headerText="Sexo">
+				<h:outputText value="#{cliente.sexo}" />
+			</p:column>
+			
+			<p:column headerText="Email">
+				<h:outputText value="#{cliente.email}"   />
+			</p:column>
+			
+			<p:column headerText="Data nascimento" >
+				<h:outputText value="#{cliente.dataNascimento}"  >
+					 <f:convertDateTime pattern="dd/MM/yyyy"/> 
+				</h:outputText>
+			</p:column>
+
+			<p:column headerText="Naturalidade">
+				<h:outputText value="#{cliente.naturalidade}"   />
+			</p:column>
+
+			<p:column headerText="Nacionalidade">
+				<h:outputText value="#{cliente.nacionalidade}"   />
+			</p:column>
+
+		</p:dataTable>
+		
+		<p:dialog id="clienteDialog" header="Nova cliente" widgetVar="clienteDialogWidgetVar"
+			modal="true" resizable="false" closeOnEscape="true">
+
+			<p:messages id="clienteMessages" />
+
+			<p:defaultCommand target="salvarCommandBtton" scope="salvarCommandBtton" />
+
+			<h:panelGrid id="clientePanelGrid" columns="2"
+				rendered="#{gestaoClienteBean.cliente ne null}">
+				<p:outputLabel value="Nome: " for="nome" />
+				<p:inputText id="nome" size="60" maxlength="60" required="true" 
+					value="#{gestaoClienteBean.cliente.nome}"/>
+
+				<p:outputLabel value="Sexo: " for="sexo" />
+				<p:selectOneMenu id="sexo" value="#{gestaoClienteBean.cliente.sexo}">
+					<f:selectItem itemValue="Feminino"  itemLabel="Feminino"/>
+					<f:selectItem itemValue="Masculino" itemLabel="Masculino"/>
+				</p:selectOneMenu>
+
+				<p:outputLabel value="Email: " for="email" />
+				<p:inputText id="email" size="60" maxlength="100"  
+					value="#{gestaoClienteBean.cliente.email}" onkeydown="countPChars()">
+					 <p:ajax event="change" listener="#{gestaoClienteBean.pesquisarEmail}"
+					 					update="clienteMessages email"  resetValues="email"
+					 />
+     			</p:inputText>
+
+				<p:outputLabel value="Data nascimento: " for="dataNascimento" />
+				<p:calendar id="dataNascimento" pattern="dd/MM/yyyy" size="20" 
+					value="#{gestaoClienteBean.cliente.dataNascimento}"/>
+
+				<p:outputLabel value="CPF: " for="cpf" />
+				<p:inputMask id="cpf" mask="999.999.999-99" size="14" maxlength="14" required="true"
+					value="#{gestaoClienteBean.cliente.cpf}"  onkeydown="countPChars()" 
+					>
+					 <p:ajax event="change" listener="#{gestaoClienteBean.pesquisarCpf}"
+					 					update="clienteMessages cpf"  resetValues="cpf"
+					 />
+     			</p:inputMask>
+
+				<p:outputLabel value="Naturalidade: " for="natural" />
+				<p:inputText id="natural" size="40" maxlength="40"  
+					value="#{gestaoClienteBean.cliente.naturalidade}"/>
+
+				<p:outputLabel value="Nacionalidade: " for="nacional" />
+				<p:inputText id="nacional" size="40" maxlength="40"  
+					value="#{gestaoClienteBean.cliente.nacionalidade}"/>
+
+			
+				<h:outputLabel />
+				<p:commandButton id="salvarCommandBtton" value="Salvar" 
+					actionListener="#{gestaoClienteBean.salvar}"
+					update="clientePanelGrid clienteMessages "
+					oncomplete="if (!args.validationFailed) PF('clienteDialogWidgetVar').hide()" 
+					process="clienteDialog"/>
+			</h:panelGrid>
+		</p:dialog>
+	</h:form>
+  </ui:define>
+
+</ui:composition>

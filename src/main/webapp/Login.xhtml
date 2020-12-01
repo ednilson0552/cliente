@@ -1,0 +1,50 @@
+<!DOCTYPE html >
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+ 	xmlns:h="http://xmlns.jcp.org/jsf/html"
+ 	xmlns:f="http://xmlns.jcp.org/jsf/core"
+ 	xmlns:p="http://primefaces.org/ui"
+ 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+ 	template="WEB-INF/template/Layout.xhtml">
+ 	
+<ui:define name="titulo">
+	<div id="centralTitulo" align="center" >
+		Login
+	</div>	
+</ui:define>
+
+<ui:define name="conteudo">
+    <div id="central" align="center" >
+	    <div id="titulo_login">Acesso Restrito</div>
+        <div >Apenas Pessoas autorizadas podem
+                     acessar este painel
+        </div>
+              
+        <h:form id="formLogin" >
+    	    <p:messages autoUpdate="true" id="messages" />
+
+            <p:panelGrid  columns="2">
+
+        	    <h:outputText value="Login: " />
+                <p:inputText value="#{gestaoUsuarioBean.login}"
+                      size="40" />
+
+                <h:outputText value="Senha: " />
+            	<p:password value="#{gestaoUsuarioBean.senha}"
+                      size="40" />
+
+            </p:panelGrid>
+
+            <br />
+            <br />
+            <p:panelGrid styleClass="semBorda" >
+             	<p:commandButton icon="ui-icon-unlocked"
+                     value="Entrar" action="#{gestaoUsuarioBean.doLogin}" 
+                     update="formLogin"/>
+
+            </p:panelGrid>
+
+        </h:form>
+    </div>      
+</ui:define>
+
+</ui:composition>
